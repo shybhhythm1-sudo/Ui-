@@ -765,12 +765,18 @@ startBtn.addEventListener('click', async ()=>{
 
 document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
   authError.textContent = '';
+  const gBtn = document.getElementById('googleSignInBtn');
+  gBtn.disabled = true;
+  gBtn.style.opacity = '.6';
   const provider = new firebase.auth.GoogleAuthProvider();
   try{
     await auth.signInWithPopup(provider);
-    // باقي الإعداد (إنشاء البروفايل لو مش موجود) بيحصل تلقائي جوه onAuthStateChanged
+    // نجح تسجيل الدخول - onAuthStateChanged هيدخّل المستخدم للبرنامج تلقائي فورًا
+    document.getElementById('bootScreen').classList.remove('hidden');
   }catch(err){
     console.error(err);
+    gBtn.disabled = false;
+    gBtn.style.opacity = '1';
     if(err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request' || err.code === 'auth/operation-not-supported-in-this-environment'){
       try{ await auth.signInWithRedirect(provider); }
       catch(err2){ authError.textContent = 'حصل خطأ: ' + err2.message; }
@@ -781,6 +787,27 @@ document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
     } else {
       authError.textContent = 'حصل خطأ في تسجيل الدخول بجوجل: ' + err.message;
     }
+  }
+});
+
+function showAuthScreen(){
+  document.getElementById('authScreen').classList.remove('hidden');
+  const gBtn = document.getElementById('googleSignInBtn');
+  gBtn.disabled = false;
+  gBtn.style.opacity = '1';
+}
+
+// معالجة نتيجة تسجيل الدخول لو حصل عن طريق إعادة التوجيه (Redirect) بدل النافذة المنبثقة
+auth.getRedirectResult().then((result)=>{
+  if(result && result.user){
+    document.getElementById('bootScreen').classList.remove('hidden');
+  }
+}).catch((err)=>{
+  console.error(err);
+  if(err && err.code){
+    document.getElementById('bootScreen').classList.add('hidden');
+    showAuthScreen();
+    authError.textContent = 'حصل خطأ في تسجيل الدخول بجوجل: ' + err.message;
   }
 });
 
@@ -813,17 +840,17 @@ auth.onAuthStateChanged(async (user)=>{
           myProfile = profile;
           enterApp();
         } else {
-          document.getElementById('authScreen').classList.remove('hidden');
+          showAuthScreen();
         }
       }
       db.ref('users/'+myUid+'/online').set(true);
       db.ref('users/'+myUid+'/online').onDisconnect().set(false);
     }catch(err){
       console.error(err);
-      document.getElementById('authScreen').classList.remove('hidden');
+      showAuthScreen();
     }
   } else if(!authResolved){
-    document.getElementById('authScreen').classList.remove('hidden');
+    showAuthScreen();
   }
   authResolved = true;
 });
@@ -832,7 +859,7 @@ auth.onAuthStateChanged(async (user)=>{
 setTimeout(()=>{
   if(!authResolved){
     document.getElementById('bootScreen').classList.add('hidden');
-    document.getElementById('authScreen').classList.remove('hidden');
+    showAuthScreen();
   }
 }, 6000);
 
@@ -1266,7 +1293,15 @@ async function startRecording(e){
   recCancelled = false;
   recStartX = getClientX(e);
   try{
-    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio:{
+        echoCancellation:true,
+        noiseSuppression:true,
+        autoGainControl:true,
+        channelCount:1,
+        sampleRate:48000
+      }
+    });
   }catch(err){
     alert('محتاج إذن الميكروفون عشان تسجل رسالة صوتية');
     return;
@@ -1274,7 +1309,9 @@ async function startRecording(e){
   let mimeType = 'audio/webm;codecs=opus';
   if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
   if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
-  mediaRecorder = mimeType ? new MediaRecorder(mediaStream, {mimeType}) : new MediaRecorder(mediaStream);
+  mediaRecorder = mimeType
+    ? new MediaRecorder(mediaStream, {mimeType, audioBitsPerSecond:128000})
+    : new MediaRecorder(mediaStream, {audioBitsPerSecond:128000});
   audioChunks = [];
   waveformSamples = [];
   mediaRecorder.ondataavailable = (ev)=>{ if(ev.data && ev.data.size>0) audioChunks.push(ev.data); };
@@ -1595,7 +1632,14 @@ async function startCall(peerUid, peerName, peerColor){
   showCallScreen(peerName, peerColor, true);
   document.getElementById('callStatusText').textContent = 'جاري الاتصال...';
 
-  localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio:{
+      echoCancellation:true,
+      noiseSuppression:true,
+      autoGainControl:true,
+      channelCount:1
+    }
+  });
   pc = new RTCPeerConnection(ICE_SERVERS);
   localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
   pc.ontrack = (e)=>{ document.getElementById('remoteAudio').srcObject = e.streams[0]; };
@@ -1660,7 +1704,14 @@ function showCallScreen(name, color, calling){
 document.getElementById('acceptCallBtn').addEventListener('click', async ()=>{
   const data = incomingCallData;
   if(!data) return;
-  localStream = await navigator.mediaDevices.getUserMedia({audio:true});
+  localStream = await navigator.mediaDevices.getUserMedia({
+    audio:{
+      echoCancellation:true,
+      noiseSuppression:true,
+      autoGainControl:true,
+      channelCount:1
+    }
+  });
   pc = new RTCPeerConnection(ICE_SERVERS);
   localStream.getTracks().forEach(t=>pc.addTrack(t, localStream));
   pc.ontrack = (e)=>{ document.getElementById('remoteAudio').srcObject = e.streams[0]; };
