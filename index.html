@@ -769,10 +769,12 @@ document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
   gBtn.disabled = true;
   gBtn.style.opacity = '.6';
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
   try{
     await auth.signInWithPopup(provider);
     // نجح تسجيل الدخول - onAuthStateChanged هيدخّل المستخدم للبرنامج تلقائي فورًا
     document.getElementById('bootScreen').classList.remove('hidden');
+    armBootWatchdog();
   }catch(err){
     console.error(err);
     gBtn.disabled = false;
@@ -790,7 +792,21 @@ document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
   }
 });
 
+let bootWatchdog = null;
+function armBootWatchdog(){
+  clearTimeout(bootWatchdog);
+  bootWatchdog = setTimeout(()=>{
+    document.getElementById('bootScreen').classList.add('hidden');
+    showAuthScreen();
+    authError.textContent = 'حصل خطأ في الاتصال، حاول تسجل الدخول تاني';
+  }, 9000);
+}
+function disarmBootWatchdog(){
+  clearTimeout(bootWatchdog);
+}
 function showAuthScreen(){
+  disarmBootWatchdog();
+  document.getElementById('bootScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.remove('hidden');
   const gBtn = document.getElementById('googleSignInBtn');
   gBtn.disabled = false;
@@ -801,6 +817,7 @@ function showAuthScreen(){
 auth.getRedirectResult().then((result)=>{
   if(result && result.user){
     document.getElementById('bootScreen').classList.remove('hidden');
+    armBootWatchdog();
   }
 }).catch((err)=>{
   console.error(err);
@@ -814,8 +831,9 @@ auth.getRedirectResult().then((result)=>{
 /* ============ حالة الدخول ============ */
 let authResolved = false;
 auth.onAuthStateChanged(async (user)=>{
-  document.getElementById('bootScreen').classList.add('hidden');
   if(user){
+    document.getElementById('bootScreen').classList.remove('hidden');
+    armBootWatchdog();
     myUid = user.uid;
     try{
       const snap = await db.ref('users/'+myUid).get();
@@ -864,6 +882,8 @@ setTimeout(()=>{
 }, 6000);
 
 function enterApp(){
+  disarmBootWatchdog();
+  document.getElementById('bootScreen').classList.add('hidden');
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('mainScreen').classList.remove('hidden');
   document.getElementById('mainScreen').style.display = 'flex';
