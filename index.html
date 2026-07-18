@@ -283,6 +283,18 @@
   .bubble.in .waveBars span{background:rgba(42,29,6,.35);}
   .bubble.in .waveProgress .waveBars span{background:var(--brand-deep);}
   .bubble.in .playBtn{background:var(--brand-deep);}
+
+  /* رسالة صورة */
+  .bubble.image{padding:4px;background:transparent !important;box-shadow:none !important;max-width:65%;}
+  .bubble.image img{width:100%;border-radius:12px;display:block;cursor:pointer;}
+  .bubble.image .t{padding:4px 6px 0;}
+
+  /* مؤشر الكتابة */
+  .typingDots{display:inline-flex;gap:3px;align-items:center;}
+  .typingDots span{width:5px;height:5px;border-radius:50%;background:#8FE0B8;animation:typingBounce 1.2s infinite ease-in-out;}
+  .typingDots span:nth-child(2){animation-delay:.15s;}
+  .typingDots span:nth-child(3){animation-delay:.3s;}
+  @keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:.5;}30%{transform:translateY(-3px);opacity:1;}}
   .backBtn{background:transparent;border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:2px;}
 
   /* ===== الحالات ===== */
@@ -392,6 +404,7 @@
       <div style="display:flex;align-items:center;gap:10px;">
         <button id="installBtn" class="hidden" style="background:var(--gold);color:#291b04;border:none;border-radius:16px;padding:6px 12px;font-family:'Cairo',sans-serif;font-weight:800;font-size:12px;cursor:pointer;box-shadow:0 3px 10px rgba(217,164,65,.4);">تثبيت التطبيق</button>
         <span id="myUsernameTag" style="font-size:12px;opacity:.85;"></span>
+        <button id="profileBtn" style="width:32px;height:32px;border-radius:50%;border:none;color:#fff;font-weight:800;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;"></button>
       </div>
     </header>
 
@@ -448,6 +461,7 @@
     <div id="messages"></div>
     <div class="composer" id="composerRow">
       <input id="msgInput" type="text" placeholder="اكتب رسالة">
+      <button class="micBtn" id="imageBtn" style="background:var(--brand-soft);color:var(--brand);"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
       <button class="sendBtn hidden" id="sendBtn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
       <button class="micBtn" id="micBtn"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
     </div>
@@ -503,6 +517,29 @@
     </div>
   </div>
 </div>
+
+<!-- ===== مودال البروفايل ===== -->
+<div class="modal-overlay hidden" id="profileModal">
+  <div class="modal-box">
+    <h3>حسابي</h3>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:16px;">
+      <div class="avatar" id="profileAvatar" style="width:70px;height:70px;font-size:24px;margin-bottom:10px;"></div>
+      <div style="font-size:12px;color:var(--muted);direction:ltr;" id="profileUsernameOut">—</div>
+    </div>
+    <input id="profileNameInput" type="text" placeholder="اسمك">
+    <div class="modalMsg" id="profileMsg"></div>
+    <div class="modalBtns">
+      <button class="btnGhost" id="logoutBtn" style="color:var(--danger);">تسجيل خروج</button>
+      <button class="btnPrimary" id="saveProfileBtn">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== عارض الصور بملء الشاشة ===== -->
+<div class="modal-overlay hidden" id="imageViewer" style="background:rgba(0,0,0,.92);padding:0;">
+  <img id="imageViewerImg" src="" style="max-width:100%;max-height:90vh;border-radius:6px;">
+</div>
+<input type="file" id="imageInput" accept="image/*" class="hidden">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -687,12 +724,48 @@ function enterApp(){
   document.getElementById('mainScreen').classList.remove('hidden');
   document.getElementById('mainScreen').style.display = 'flex';
   document.getElementById('myUsernameTag').textContent = '@' + myProfile.username;
+  const pBtn = document.getElementById('profileBtn');
+  pBtn.style.background = myProfile.color;
+  pBtn.textContent = initials(myProfile.name);
   loadChats();
   loadStatuses();
   loadCalls();
   listenForIncomingCalls();
   setupNotifications();
 }
+
+/* ============ البروفايل ============ */
+const profileModal = document.getElementById('profileModal');
+document.getElementById('profileBtn').addEventListener('click', ()=>{
+  document.getElementById('profileAvatar').style.background = myProfile.color;
+  document.getElementById('profileAvatar').textContent = initials(myProfile.name);
+  document.getElementById('profileUsernameOut').textContent = '@' + myProfile.username;
+  document.getElementById('profileNameInput').value = myProfile.name;
+  document.getElementById('profileMsg').textContent = '';
+  profileModal.classList.remove('hidden');
+});
+profileModal.addEventListener('click', (e)=>{ if(e.target === profileModal) profileModal.classList.add('hidden'); });
+document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+  const newName = document.getElementById('profileNameInput').value.trim();
+  if(!newName){ document.getElementById('profileMsg').textContent = 'اكتب اسم صحيح'; return; }
+  await db.ref('users/'+myUid+'/name').set(newName);
+  myProfile.name = newName;
+  document.getElementById('profileBtn').textContent = initials(newName);
+  profileModal.classList.add('hidden');
+});
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  if(!confirm('متأكد إنك عايز تسجل خروج؟')) return;
+  await auth.signOut();
+  location.reload();
+});
+
+/* ============ عارض الصور بملء الشاشة ============ */
+const imageViewer = document.getElementById('imageViewer');
+function openImageViewer(src){
+  document.getElementById('imageViewerImg').src = src;
+  imageViewer.classList.remove('hidden');
+}
+imageViewer.addEventListener('click', ()=> imageViewer.classList.add('hidden'));
 
 /* ============ إشعارات الرسائل الجديدة ============ */
 const seenChatTs = {}; // آخر توقيت شوفناه لكل محادثة (عشان منبعتش إشعار للرسايل القديمة)
@@ -818,9 +891,25 @@ function loadChats(){
       </div>
     `).join('');
     list.querySelectorAll('.chat-item').forEach(el=>{
+      let longPressFired = false;
       el.addEventListener('click', ()=>{
+        if(longPressFired){ longPressFired = false; return; }
         openChat(el.dataset.chatid, el.dataset.uid, el.dataset.name, el.dataset.username, el.dataset.color);
       });
+      let pressTimer = null;
+      const startPress = ()=>{
+        longPressFired = false;
+        pressTimer = setTimeout(()=>{
+          longPressFired = true;
+          if(confirm('تمسح المحادثة مع ' + el.dataset.name + '؟')){
+            db.ref('userChats/'+myUid+'/'+el.dataset.chatid).remove();
+          }
+        }, 550);
+      };
+      const cancelPress = ()=> clearTimeout(pressTimer);
+      el.addEventListener('mousedown', startPress);
+      el.addEventListener('touchstart', startPress, {passive:true});
+      ['mouseup','mouseleave','touchend','touchmove'].forEach(ev=> el.addEventListener(ev, cancelPress));
     });
   });
 }
@@ -858,6 +947,9 @@ document.getElementById('confirmNewChat').addEventListener('click', async ()=>{
 let messagesListener = null;
 let peerOnlineRef = null;
 let peerOnlineListener = null;
+let peerTypingRef = null;
+let peerTypingListener = null;
+let isPeerTyping = false;
 function openChat(chatId, otherUid, name, username, color){
   currentChatId = chatId;
   currentPeer = {uid: otherUid, name, username, color};
@@ -871,10 +963,12 @@ function openChat(chatId, otherUid, name, username, color){
   document.getElementById('messages').innerHTML = '';
   document.getElementById('msgInput').value = '';
   toggleComposerButtons();
+  isPeerTyping = false;
 
   if(peerOnlineRef) peerOnlineRef.off('value', peerOnlineListener);
   peerOnlineRef = db.ref('users/'+otherUid+'/online');
   peerOnlineListener = (snap)=>{
+    if(isPeerTyping) return; // مؤشر الكتابة له أولوية
     const statusEl = document.getElementById('chatPeerStatus');
     if(snap.val()){
       statusEl.textContent = 'متصل الآن';
@@ -885,6 +979,21 @@ function openChat(chatId, otherUid, name, username, color){
     }
   };
   peerOnlineRef.on('value', peerOnlineListener);
+
+  if(peerTypingRef) peerTypingRef.off('value', peerTypingListener);
+  peerTypingRef = db.ref('chats/'+chatId+'/typing/'+otherUid);
+  peerTypingListener = (snap)=>{
+    const statusEl = document.getElementById('chatPeerStatus');
+    isPeerTyping = !!snap.val();
+    if(isPeerTyping){
+      statusEl.innerHTML = 'يكتب الآن <span class="typingDots"><span></span><span></span><span></span></span>';
+      statusEl.style.color = '#8FE0B8';
+    } else {
+      statusEl.textContent = '@' + username;
+      statusEl.style.color = '';
+    }
+  };
+  peerTypingRef.on('value', peerTypingListener);
 
   if(messagesListener) db.ref('messages/'+chatId).off('value', messagesListener);
   messagesListener = (snap)=>{
@@ -897,6 +1006,13 @@ function openChat(chatId, otherUid, name, username, color){
       if(m.type === 'voice'){
         return renderVoiceBubble(m, out);
       }
+      if(m.type === 'image'){
+        return `
+        <div class="bubble image ${out}">
+          <img src="${m.image}" data-full="${m.image}">
+          <div class="t">${fmtTime(m.ts)}</div>
+        </div>`;
+      }
       return `
       <div class="bubble ${out}">
         ${escapeHtml(m.text)}
@@ -907,6 +1023,10 @@ function openChat(chatId, otherUid, name, username, color){
   };
   db.ref('messages/'+chatId).on('value', messagesListener);
 }
+document.getElementById('messages').addEventListener('click', (e)=>{
+  const img = e.target.closest('.bubble.image img');
+  if(img) openImageViewer(img.dataset.full);
+});
 function escapeHtml(str){
   const d = document.createElement('div');
   d.textContent = str;
@@ -916,6 +1036,8 @@ document.getElementById('chatBackBtn').addEventListener('click', ()=>{
   document.getElementById('chatScreen').classList.add('hidden');
   if(messagesListener){ db.ref('messages/'+currentChatId).off('value', messagesListener); messagesListener=null; }
   if(peerOnlineRef){ peerOnlineRef.off('value', peerOnlineListener); peerOnlineRef=null; peerOnlineListener=null; }
+  if(peerTypingRef){ peerTypingRef.off('value', peerTypingListener); peerTypingRef=null; peerTypingListener=null; }
+  setTyping(false);
   currentChatId = null;
   if(currentVoiceAudio){ currentVoiceAudio.pause(); currentVoiceAudio = null; currentVoiceId = null; }
 });
@@ -930,14 +1052,71 @@ async function sendMessage(){
   const ts = Date.now();
   await db.ref('messages/'+currentChatId).push({from: myUid, text, ts});
   await db.ref('chats/'+currentChatId+'/meta').update({lastMessage: text, lastTs: ts, lastSender: myUid});
+  setTyping(false);
 }
 
 /* إظهار زرار الإرسال لو فيه نص، وإلا إظهار الميكروفون */
-document.getElementById('msgInput').addEventListener('input', toggleComposerButtons);
+document.getElementById('msgInput').addEventListener('input', ()=>{
+  toggleComposerButtons();
+  handleTypingInput();
+});
 function toggleComposerButtons(){
   const hasText = document.getElementById('msgInput').value.trim().length > 0;
   document.getElementById('sendBtn').classList.toggle('hidden', !hasText);
   document.getElementById('micBtn').classList.toggle('hidden', hasText);
+}
+
+/* ============ مؤشر الكتابة ============ */
+let typingTimeout = null;
+function handleTypingInput(){
+  if(!currentChatId) return;
+  setTyping(true);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(()=> setTyping(false), 2500);
+}
+function setTyping(isTyping){
+  if(!currentChatId) return;
+  const ref = db.ref('chats/'+currentChatId+'/typing/'+myUid);
+  ref.set(isTyping);
+  if(isTyping) ref.onDisconnect().set(false);
+}
+
+/* ============ إرسال الصور ============ */
+document.getElementById('imageBtn').addEventListener('click', ()=>{
+  document.getElementById('imageInput').click();
+});
+document.getElementById('imageInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file || !currentChatId) return;
+  try{
+    const compressed = await compressImage(file, 900, 0.65);
+    const ts = Date.now();
+    await db.ref('messages/'+currentChatId).push({from: myUid, type:'image', image: compressed, ts});
+    await db.ref('chats/'+currentChatId+'/meta').update({lastMessage:'📷 صورة', lastTs: ts, lastSender: myUid});
+  }catch(err){
+    console.error(err);
+    alert('حصل خطأ في إرسال الصورة');
+  }
+});
+function compressImage(file, maxDim, quality){
+  return new Promise((resolve, reject)=>{
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e)=>{ img.src = e.target.result; };
+    reader.onerror = reject;
+    img.onload = ()=>{
+      let w = img.width, h = img.height;
+      if(w > h && w > maxDim){ h = h*(maxDim/w); w = maxDim; }
+      else if(h > maxDim){ w = w*(maxDim/h); h = maxDim; }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 /* ============ تسجيل الرسائل الصوتية ============ */
