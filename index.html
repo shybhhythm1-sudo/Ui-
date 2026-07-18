@@ -160,6 +160,19 @@
   #authScreen button:active{transform:scale(.98);}
   #authScreen button:disabled{opacity:.45;box-shadow:none;}
   #authError{color:#ffd7d7;font-size:12px;margin-top:10px;min-height:16px;position:relative;z-index:1;}
+  .authDivider{
+    display:flex;align-items:center;gap:10px;margin:16px 0;color:rgba(255,255,255,.5);font-size:12px;
+    position:relative;z-index:1;
+  }
+  .authDivider::before,.authDivider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.18);}
+  #googleSignInBtn{
+    width:100%;padding:13px;border-radius:14px;border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.95);color:#3c4043;font-weight:700;font-size:14.5px;
+    font-family:'Cairo',sans-serif;cursor:pointer;position:relative;z-index:1;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    box-shadow:0 4px 14px rgba(0,0,0,.15);transition:transform .15s ease;
+  }
+  #googleSignInBtn:active{transform:scale(.98);}
 
   /* ===== الهيدر العلوي ===== */
   header.topbar{
@@ -270,19 +283,42 @@
   .recHint.cancelReady{color:var(--danger);font-weight:700;}
 
   /* رسالة صوتية */
-  .bubble.voice{display:flex;align-items:center;gap:8px;padding:8px 10px;min-width:190px;}
-  .playBtn{width:32px;height:32px;border-radius:50%;background:var(--mid);color:#fff;border:none;font-size:13px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-  .waveWrap{position:relative;flex:1;height:26px;cursor:pointer;}
-  .waveBars{display:flex;align-items:center;gap:2px;height:100%;width:100%;}
-  .waveBars span{display:block;width:3px;border-radius:2px;background:#b7c4c1;flex-shrink:0;}
+  .bubble.voice{display:flex;align-items:center;gap:10px;padding:9px 13px 9px 9px;min-width:215px;}
+  .playBtn{
+    width:38px;height:38px;border-radius:50%;
+    background:linear-gradient(135deg,var(--brand),var(--brand-light));
+    color:#fff;border:none;flex-shrink:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 10px rgba(15,110,92,.35);
+    transition:transform .15s ease,box-shadow .3s ease;
+  }
+  .playBtn:active{transform:scale(.9);}
+  .playBtn.playing{animation:playPulse 1.7s ease-in-out infinite;}
+  @keyframes playPulse{
+    0%,100%{box-shadow:0 3px 10px rgba(15,110,92,.35);}
+    50%{box-shadow:0 3px 18px rgba(15,110,92,.65);}
+  }
+  .bubble.in .playBtn{background:linear-gradient(135deg,var(--brand-deep),var(--brand));}
+  .waveWrap{position:relative;flex:1;height:30px;cursor:pointer;}
+  .waveBars{display:flex;align-items:center;gap:2.5px;height:100%;width:100%;}
+  .waveBars span{display:block;width:2.6px;border-radius:3px;background:#c7d0ca;flex-shrink:0;transition:transform .12s ease;}
   .waveBase{position:absolute;inset:0;}
   .waveProgress{position:absolute;top:0;left:0;height:100%;width:0%;overflow:hidden;}
-  .waveProgress .waveBars span{background:var(--mid);}
-  .durLabel{font-size:11px;color:var(--muted);flex-shrink:0;min-width:32px;}
-  .bubble.in .durLabel{color:#6B551F;}
-  .bubble.in .waveBars span{background:rgba(42,29,6,.35);}
+  .waveProgress .waveBars span{background:var(--brand);}
+  .waveThumb{
+    position:absolute;top:50%;width:11px;height:11px;border-radius:50%;
+    background:var(--brand);box-shadow:0 0 0 4px rgba(15,110,92,.16),0 2px 5px rgba(0,0,0,.25);
+    transform:translate(-50%,-50%);left:0%;pointer-events:none;opacity:0;
+  }
+  .bubble.voice.hasStarted .waveThumb{opacity:1;}
+  .bubble.in .waveThumb{background:var(--brand-deep);box-shadow:0 0 0 4px rgba(10,63,53,.16),0 2px 5px rgba(0,0,0,.2);}
+  .bubble.in .waveBars span{background:rgba(42,29,6,.3);}
   .bubble.in .waveProgress .waveBars span{background:var(--brand-deep);}
-  .bubble.in .playBtn{background:var(--brand-deep);}
+  .voiceMeta{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0;}
+  .durLabel{font-size:11px;color:var(--muted);min-width:34px;text-align:left;font-variant-numeric:tabular-nums;}
+  .bubble.in .durLabel{color:#6B551F;}
+  .voiceMicIcon{opacity:.55;color:var(--muted);}
+  .bubble.in .voiceMicIcon{color:#6B551F;opacity:.6;}
 
   /* رسالة صورة */
   .bubble.image{padding:4px;background:transparent !important;box-shadow:none !important;max-width:65%;}
@@ -376,8 +412,14 @@
 
 <div id="app">
 
+  <!-- ===== شاشة تحميل أولية (فحص الجلسة) ===== -->
+  <div id="bootScreen" style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(165deg,var(--brand-deeper),var(--brand-deep) 45%,var(--brand-light));">
+    <div style="width:38px;height:38px;border-radius:50%;border:3px solid rgba(255,255,255,.25);border-top-color:var(--gold);animation:bootSpin .8s linear infinite;"></div>
+  </div>
+  <style>@keyframes bootSpin{to{transform:rotate(360deg);}}</style>
+
   <!-- ===== شاشة تسجيل الدخول ===== -->
-  <div id="authScreen">
+  <div id="authScreen" class="hidden">
     <div class="brandMark">
       <div class="wordmarkWrap">
         <span class="rippleRing r1"></span>
@@ -392,6 +434,16 @@
       <input id="nameInput" type="text" placeholder="اكتب اسمك بالعربي أو الإنجليزي">
       <div id="usernamePreview">اسم المستخدم: <b id="usernameOut">—</b></div>
       <button id="startBtn" disabled>ابدأ</button>
+      <div class="authDivider"><span>أو</span></div>
+      <button id="googleSignInBtn" type="button">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.6l-6.6-5.6C29.6 34.7 26.9 36 24 36c-5.3 0-9.7-3.1-11.3-7.9l-6.6 5.1C9.6 39.6 16.2 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.6 5.6C41.9 36.4 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/>
+        </svg>
+        <span>تسجيل الدخول بجوجل</span>
+      </button>
       <div id="authError"></div>
     </div>
   </div>
@@ -690,6 +742,13 @@ startBtn.addEventListener('click', async ()=>{
     };
     await db.ref('users/'+uid).set(profile);
     await db.ref('usernames/'+username).set(uid);
+
+    myUid = uid;
+    myProfile = profile;
+    authResolved = true;
+    db.ref('users/'+myUid+'/online').set(true);
+    db.ref('users/'+myUid+'/online').onDisconnect().set(false);
+    enterApp();
   }catch(e){
     console.error(e);
     if(e.code === 'auth/configuration-not-found'){
@@ -704,20 +763,78 @@ startBtn.addEventListener('click', async ()=>{
   }
 });
 
-/* ============ حالة الدخول ============ */
-auth.onAuthStateChanged(async (user)=>{
-  if(user){
-    myUid = user.uid;
-    const snap = await db.ref('users/'+myUid).get();
-    if(snap.exists()){
-      myProfile = snap.val();
-      enterApp();
+document.getElementById('googleSignInBtn').addEventListener('click', async ()=>{
+  authError.textContent = '';
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try{
+    await auth.signInWithPopup(provider);
+    // باقي الإعداد (إنشاء البروفايل لو مش موجود) بيحصل تلقائي جوه onAuthStateChanged
+  }catch(err){
+    console.error(err);
+    if(err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request' || err.code === 'auth/operation-not-supported-in-this-environment'){
+      try{ await auth.signInWithRedirect(provider); }
+      catch(err2){ authError.textContent = 'حصل خطأ: ' + err2.message; }
+    } else if(err.code === 'auth/unauthorized-domain'){
+      authError.textContent = 'الدومين ده مش مضاف في Firebase (Authentication > Settings > Authorized domains)';
+    } else if(err.code === 'auth/popup-closed-by-user'){
+      // المستخدم قفل النافذة، متعملش حاجة
+    } else {
+      authError.textContent = 'حصل خطأ في تسجيل الدخول بجوجل: ' + err.message;
     }
-    // لو مفيش بروفايل، سيبه في شاشة تسجيل الاسم
-    db.ref('users/'+myUid+'/online').set(true);
-    db.ref('users/'+myUid+'/online').onDisconnect().set(false);
   }
 });
+
+/* ============ حالة الدخول ============ */
+let authResolved = false;
+auth.onAuthStateChanged(async (user)=>{
+  document.getElementById('bootScreen').classList.add('hidden');
+  if(user){
+    myUid = user.uid;
+    try{
+      const snap = await db.ref('users/'+myUid).get();
+      if(snap.exists()){
+        myProfile = snap.val();
+        enterApp();
+      } else {
+        const isGoogle = user.providerData.some(p => p.providerId === 'google.com');
+        if(isGoogle){
+          const displayName = user.displayName || 'مستخدم';
+          const base = toEnglishUsername(displayName);
+          const username = await makeUniqueUsername(base);
+          const profile = {
+            name: displayName,
+            username: username,
+            color: avatarColor(username),
+            createdAt: Date.now(),
+            online: true
+          };
+          await db.ref('users/'+myUid).set(profile);
+          await db.ref('usernames/'+username).set(myUid);
+          myProfile = profile;
+          enterApp();
+        } else {
+          document.getElementById('authScreen').classList.remove('hidden');
+        }
+      }
+      db.ref('users/'+myUid+'/online').set(true);
+      db.ref('users/'+myUid+'/online').onDisconnect().set(false);
+    }catch(err){
+      console.error(err);
+      document.getElementById('authScreen').classList.remove('hidden');
+    }
+  } else if(!authResolved){
+    document.getElementById('authScreen').classList.remove('hidden');
+  }
+  authResolved = true;
+});
+
+// لو الفحص أخد وقت طويل (مشكلة نت مثلًا)، متسيبش المستخدم واقف قدام شاشة فاضية
+setTimeout(()=>{
+  if(!authResolved){
+    document.getElementById('bootScreen').classList.add('hidden');
+    document.getElementById('authScreen').classList.remove('hidden');
+  }
+}, 6000);
 
 function enterApp(){
   document.getElementById('authScreen').classList.add('hidden');
@@ -1280,15 +1397,19 @@ function iconPauseSvg(){ return '<svg viewBox="0 0 24 24" width="13" height="13"
 
 function renderVoiceBubble(m, out){
   const wave = (m.wave && m.wave.length) ? m.wave : new Array(32).fill(0.3);
-  const barsHtml = wave.map(v=>`<span style="height:${Math.round(v*100)}%;"></span>`).join('');
+  const barsHtml = wave.map(v=>`<span style="height:${Math.max(14,Math.round(v*100))}%;"></span>`).join('');
   return `
-  <div class="bubble voice ${out}" data-audio-id="${m.id}" data-audio-src="${m.audio}">
+  <div class="bubble voice ${out}" data-audio-id="${m.id}" data-audio-src="${m.audio}" data-duration="${m.duration||0}">
     <button class="playBtn" data-id="${m.id}">${iconPlaySvg()}</button>
     <div class="waveWrap" data-id="${m.id}">
       <div class="waveBase waveBars">${barsHtml}</div>
       <div class="waveProgress" data-id="${m.id}"><div class="waveBars">${barsHtml}</div></div>
+      <span class="waveThumb" data-id="${m.id}"></span>
     </div>
-    <span class="durLabel" data-id="${m.id}">${mmss(m.duration||0)}</span>
+    <div class="voiceMeta">
+      <svg class="voiceMicIcon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+      <span class="durLabel" data-id="${m.id}">${mmss(m.duration||0)}</span>
+    </div>
   </div>`;
 }
 
@@ -1308,34 +1429,42 @@ function toggleVoicePlay(id){
   const btn = bubble.querySelector('.playBtn');
 
   if(currentVoiceId === id && currentVoiceAudio){
-    if(currentVoiceAudio.paused){ currentVoiceAudio.play(); btn.innerHTML=iconPauseSvg(); }
-    else { currentVoiceAudio.pause(); btn.innerHTML=iconPlaySvg(); }
+    if(currentVoiceAudio.paused){ currentVoiceAudio.play(); btn.innerHTML=iconPauseSvg(); btn.classList.add('playing'); }
+    else { currentVoiceAudio.pause(); btn.innerHTML=iconPlaySvg(); btn.classList.remove('playing'); }
     return;
   }
   if(currentVoiceAudio){
     currentVoiceAudio.pause();
     const oldBtn = document.querySelector(`.playBtn[data-id="${currentVoiceId}"]`);
-    if(oldBtn) oldBtn.innerHTML = iconPlaySvg();
+    if(oldBtn){ oldBtn.innerHTML = iconPlaySvg(); oldBtn.classList.remove('playing'); }
   }
   currentVoiceAudio = new Audio(bubble.dataset.audioSrc);
   currentVoiceId = id;
   btn.innerHTML = iconPauseSvg();
+  btn.classList.add('playing');
+  bubble.classList.add('hasStarted');
   currentVoiceAudio.addEventListener('timeupdate', ()=>{
     const progress = document.querySelector(`.waveProgress[data-id="${id}"]`);
+    const thumb = document.querySelector(`.waveThumb[data-id="${id}"]`);
     const label = document.querySelector(`.durLabel[data-id="${id}"]`);
     if(currentVoiceAudio.duration){
       const pct = (currentVoiceAudio.currentTime / currentVoiceAudio.duration) * 100;
       if(progress) progress.style.width = pct + '%';
+      if(thumb) thumb.style.left = pct + '%';
       if(label) label.textContent = mmss(currentVoiceAudio.currentTime);
     }
   });
   currentVoiceAudio.addEventListener('ended', ()=>{
     btn.innerHTML=iconPlaySvg();
+    btn.classList.remove('playing');
     const progress = document.querySelector(`.waveProgress[data-id="${id}"]`);
+    const thumb = document.querySelector(`.waveThumb[data-id="${id}"]`);
     const label = document.querySelector(`.durLabel[data-id="${id}"]`);
     const bub = document.querySelector(`.bubble.voice[data-audio-id="${id}"]`);
     if(progress) progress.style.width='0%';
-    if(label && bub) label.textContent = mmss(parseFloat(bub.querySelector('.durLabel').dataset.dur||0)) || label.textContent;
+    if(thumb) thumb.style.left='0%';
+    if(bub) bub.classList.remove('hasStarted');
+    if(label && bub) label.textContent = mmss(parseFloat(bub.dataset.duration||0));
     currentVoiceId = null;
   });
   currentVoiceAudio.play();
