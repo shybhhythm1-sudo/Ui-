@@ -1488,7 +1488,6 @@ function showToast(message, kind='info', duration=4200){
   setTimeout(remove, duration);
 }
 const attachSheet = document.getElementById('attachSheet');
-const MAX_VIDEO_BYTES = 15 * 1024 * 1024; // حد أقصى تقريبي لحجم الفيديو المرسل
 
 document.getElementById('attachBtn').addEventListener('click', ()=>{
   if(!currentChatId) return;
@@ -1528,10 +1527,8 @@ document.getElementById('cameraInput').addEventListener('change', async (e)=>{
 async function handleChatMediaFile(file){
   try{
     if(file.type.startsWith('video/')){
-      if(file.size > MAX_VIDEO_BYTES){
-        showToast('الفيديو كبير أوي، اختار فيديو أقصر من 15 ميجا عشان يتبعت', 'error');
-        return;
-      }
+      // ملحوظة: تم إزالة حد الـ15 ميجا، أي حجم فيديو يتبعت زي ما هو
+      showToast('جاري رفع الفيديو...', 'info', 2500);
       const base64 = await blobToBase64(file);
       const ts = Date.now();
       await db.ref('messages/'+currentChatId).push({from: myUid, type:'video', video: base64, ts});
@@ -1937,10 +1934,7 @@ statusMediaInput.addEventListener('change', async (e)=>{
   if(!file) return;
   try{
     if(pendingStatusType === 'video'){
-      if(file.size > MAX_VIDEO_BYTES){
-        showToast('الفيديو كبير أوي، اختار فيديو أقصر من 15 ميجا', 'error');
-        return;
-      }
+      // ملحوظة: تم إزالة حد الـ15 ميجا، أي حجم فيديو يتبعت زي ما هو
       const base64 = await blobToBase64(file);
       pendingStatusContent = {type:'video', data: base64};
       document.getElementById('statusCaptionPreviewWrap').innerHTML = `<video src="${base64}" style="max-width:100%;max-height:220px;" controls playsinline></video>`;
@@ -2306,6 +2300,15 @@ function endCallCleanup(){
     db.ref('signaling/'+myUid+'/candidates/'+currentCallId).off();
     db.ref('signaling/'+myUid+'/candidates/'+currentCallId).remove();
     if(callWithUid) db.ref('signaling/'+callWithUid+'/candidates/'+currentCallId).remove();
+  }
+  incomingCallData = null;
+  currentCallId = null;
+  callWithUid = null;
+}
+</script>
+</body>
+</html>
+ithUid) db.ref('signaling/'+callWithUid+'/candidates/'+currentCallId).remove();
   }
   incomingCallData = null;
   currentCallId = null;
