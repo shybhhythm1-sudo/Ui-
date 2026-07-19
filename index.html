@@ -220,7 +220,7 @@
   .chat-info .time{font-size:11px;color:var(--muted);}
   .chat-info .last{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .empty-state{padding:70px 28px;text-align:center;color:var(--muted);line-height:1.8;}
-  .empty-state div.emoji{font-size:42px;margin-bottom:12px;opacity:.7;}
+  .empty-state div.emoji{margin-bottom:14px;display:flex;justify-content:center;}
 
   .fab{
     position:absolute;bottom:22px;left:22px;
@@ -283,7 +283,9 @@
   .recHint.cancelReady{color:var(--danger);font-weight:700;}
 
   /* رسالة صوتية */
-  .bubble.voice{display:flex;align-items:center;gap:10px;padding:9px 13px 9px 9px;min-width:215px;}
+  .bubble.voice{display:flex;align-items:center;gap:10px;padding:10px 14px 10px 10px;min-width:215px;border-radius:16px;}
+  .bubble.voice.out{border-bottom-left-radius:4px;}
+  .bubble.voice.in{border-bottom-right-radius:4px;}
   .playBtn{
     width:38px;height:38px;border-radius:50%;
     background:linear-gradient(135deg,var(--brand),var(--brand-light));
@@ -320,10 +322,86 @@
   .voiceMicIcon{opacity:.55;color:var(--muted);}
   .bubble.in .voiceMicIcon{color:#6B551F;opacity:.6;}
 
-  /* رسالة صورة */
-  .bubble.image{padding:4px;background:transparent !important;box-shadow:none !important;max-width:65%;}
-  .bubble.image img{width:100%;border-radius:12px;display:block;cursor:pointer;}
-  .bubble.image .t{padding:4px 6px 0;}
+  /* رسالة صورة / فيديو (شكل موحّد) */
+  .bubble.image,.bubble.video{padding:4px;background:transparent !important;box-shadow:none !important;max-width:65%;border-radius:16px;}
+  .bubble.image img{width:100%;border-radius:14px;display:block;cursor:pointer;}
+  .bubble.video{position:relative;}
+  .bubble.video video{width:100%;border-radius:14px;display:block;background:#000;max-height:340px;}
+  .bubble.image .t,.bubble.video .t{padding:4px 6px 0;}
+
+  /* رسالة موقع */
+  .bubble.location{padding:4px;background:transparent !important;box-shadow:none !important;max-width:74%;}
+  .bubble.location .locCard{
+    border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 2px 8px rgba(14,38,32,.12);cursor:pointer;
+  }
+  .bubble.location .locMap{
+    height:110px;width:100%;
+    background:
+      linear-gradient(180deg, rgba(15,110,92,.14), rgba(15,110,92,.05)),
+      repeating-linear-gradient(0deg, rgba(120,134,127,.15) 0 1px, transparent 1px 22px),
+      repeating-linear-gradient(90deg, rgba(120,134,127,.15) 0 1px, transparent 1px 22px),
+      var(--brand-soft);
+    display:flex;align-items:center;justify-content:center;position:relative;
+  }
+  .bubble.location .locPin{
+    width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    background:var(--danger);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.25);
+  }
+  .bubble.location .locPin svg{transform:rotate(45deg);}
+  .bubble.location .locInfo{padding:10px 12px;display:flex;align-items:center;gap:8px;}
+  .bubble.location .locInfo b{font-size:13.5px;color:var(--ink);}
+  .bubble.location .locInfo span{font-size:11px;color:var(--muted);}
+  .bubble.location .t{padding:4px 6px 0;}
+
+  /* شيت المرفقات */
+  .attachSheet{
+    position:fixed;inset:0;background:rgba(14,38,32,.5);z-index:210;display:flex;align-items:flex-end;justify-content:center;
+  }
+  .attachSheetBox{
+    width:100%;max-width:520px;background:var(--surface);border-radius:22px 22px 0 0;padding:18px 18px 26px;
+    animation:sheetUp .2s ease;
+  }
+  @keyframes sheetUp{from{transform:translateY(30px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  .attachSheetBox .sheetHandle{width:38px;height:4px;border-radius:3px;background:var(--line);margin:0 auto 16px;}
+  .attachGrid{display:flex;justify-content:space-around;gap:8px;}
+  .attachOpt{display:flex;flex-direction:column;align-items:center;gap:8px;background:transparent;border:none;cursor:pointer;font-family:'Cairo',sans-serif;color:var(--ink);font-size:12px;}
+  .attachOpt .attachIcon{
+    width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;
+    box-shadow:0 4px 12px rgba(14,38,32,.18);
+  }
+  .attachSheetCancel{width:100%;margin-top:18px;padding:13px;border-radius:12px;border:none;background:var(--canvas);color:var(--ink);font-weight:700;font-family:'Cairo',sans-serif;cursor:pointer;}
+
+  /* اختيار نوع الحالة */
+  .statusTypeGrid{display:flex;gap:10px;margin-bottom:6px;}
+  .statusTypeGrid button{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:14px;
+    border:1px solid var(--line);background:var(--canvas);cursor:pointer;font-family:'Cairo',sans-serif;font-size:12.5px;color:var(--ink);font-weight:700;
+  }
+  .statusTypeGrid button .attachIcon{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;}
+
+  /* عارض الحالات ملء الشاشة */
+  #statusViewer{position:fixed;inset:0;background:#000;z-index:250;display:flex;flex-direction:column;}
+  #statusViewer.hidden{display:none;}
+  .svProgressRow{display:flex;gap:4px;padding:10px 10px 0;}
+  .svProgressSeg{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden;}
+  .svProgressSeg .fill{height:100%;width:0%;background:#fff;}
+  .svProgressSeg.done .fill{width:100% !important;}
+  .svHeader{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#fff;}
+  .svHeader .name{font-weight:700;font-size:14px;}
+  .svHeader .time{font-size:11px;opacity:.75;}
+  .svHeader .svClose{margin-right:auto;background:transparent;border:none;color:#fff;cursor:pointer;padding:6px;}
+  .svBody{flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  .svBody img,.svBody video{max-width:100%;max-height:100%;object-fit:contain;}
+  .svBody .svTextCard{
+    width:88%;max-width:400px;min-height:220px;border-radius:18px;display:flex;align-items:center;justify-content:center;
+    padding:28px;text-align:center;font-size:20px;font-weight:700;color:#fff;line-height:1.7;
+    background:linear-gradient(135deg,var(--brand-deep),var(--brand-light));
+  }
+  .svTapZone{position:absolute;top:0;bottom:0;width:35%;}
+  .svTapZone.left{left:0;}
+  .svTapZone.right{right:0;}
+  .svFooter{padding:14px;display:flex;justify-content:center;}
+  .svDelete{background:rgba(188,90,69,.85);color:#fff;border:none;padding:9px 18px;border-radius:20px;font-family:'Cairo',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;}
 
   /* مؤشر الكتابة */
   .typingDots{display:inline-flex;gap:3px;align-items:center;}
@@ -406,6 +484,36 @@
   .btnPrimary{background:var(--mid);color:#fff;}
   .btnGhost{background:#eee;color:#333;}
   .modalMsg{font-size:12px;color:var(--danger);min-height:16px;}
+
+  /* توست داخلي متناسق مع هوية التطبيق بدل alert() الافتراضي */
+  #toastHost{
+    position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;
+    gap:8px;padding:0 16px 18px;z-index:400;pointer-events:none;
+  }
+  .toastCard{
+    pointer-events:auto;
+    max-width:440px;width:100%;
+    display:flex;align-items:center;gap:11px;
+    background:var(--brand-deeper);color:#fff;
+    border-radius:14px;padding:13px 15px;
+    box-shadow:0 10px 28px rgba(8,46,39,.35);
+    font-size:13.5px;line-height:1.5;
+    animation:toastIn .22s cubic-bezier(.2,.9,.3,1.2);
+    border-inline-start:4px solid var(--gold);
+  }
+  .toastCard.error{border-inline-start-color:var(--danger);}
+  .toastCard.success{border-inline-start-color:#3FBE7A;}
+  .toastCard.leaving{animation:toastOut .18s ease forwards;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes toastOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(10px);}}
+  .toastIconWrap{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;
+  }
+  .toastCard.error .toastIconWrap{background:rgba(188,90,69,.35);}
+  .toastCard.success .toastIconWrap{background:rgba(63,190,122,.3);}
+  .toastText{flex:1;}
+  .toastClose{background:transparent;border:none;color:rgba(255,255,255,.7);cursor:pointer;padding:2px;flex-shrink:0;display:flex;}
 </style>
 </head>
 <body>
@@ -513,7 +621,7 @@
     <div id="messages"></div>
     <div class="composer" id="composerRow">
       <input id="msgInput" type="text" placeholder="اكتب رسالة">
-      <button class="micBtn" id="imageBtn" style="background:var(--brand-soft);color:var(--brand);"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></button>
+      <button class="micBtn" id="attachBtn" style="background:var(--brand-soft);color:var(--brand);"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
       <button class="sendBtn hidden" id="sendBtn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></button>
       <button class="micBtn" id="micBtn"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></button>
     </div>
@@ -521,6 +629,28 @@
       <div class="recDot"></div>
       <div id="recTimer">0:00</div>
       <div class="recHint" id="recHint">اسحب لليسار للإلغاء ⟵</div>
+    </div>
+  </div>
+
+  <!-- ===== شيت اختيار مرفق للشات ===== -->
+  <div class="attachSheet hidden" id="attachSheet">
+    <div class="attachSheetBox">
+      <div class="sheetHandle"></div>
+      <div class="attachGrid">
+        <button class="attachOpt" id="attachGalleryBtn">
+          <span class="attachIcon" style="background:linear-gradient(135deg,#B37FE0,#7C4DBF);"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+          المعرض
+        </button>
+        <button class="attachOpt" id="attachCameraBtn">
+          <span class="attachIcon" style="background:linear-gradient(135deg,var(--brand-light),var(--brand-deep));"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+          الكاميرا
+        </button>
+        <button class="attachOpt" id="attachLocationBtn">
+          <span class="attachIcon" style="background:linear-gradient(135deg,#EFC46F,var(--gold-deep));"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+          الموقع
+        </button>
+      </div>
+      <button class="attachSheetCancel" id="attachSheetCancel">إلغاء</button>
     </div>
   </div>
 
@@ -545,6 +675,8 @@
 
 </div>
 
+<div id="toastHost"></div>
+
 <!-- ===== مودال محادثة جديدة ===== -->
 <div class="modal-overlay hidden" id="newChatModal">
   <div class="modal-box">
@@ -558,16 +690,71 @@
   </div>
 </div>
 
-<!-- ===== مودال حالة جديدة ===== -->
-<div class="modal-overlay hidden" id="newStatusModal">
+<!-- ===== مودال اختيار نوع الحالة ===== -->
+<div class="modal-overlay hidden" id="statusTypeModal">
   <div class="modal-box">
     <h3>إضافة حالة</h3>
+    <div class="statusTypeGrid">
+      <button id="statusTypeTextBtn">
+        <span class="attachIcon" style="background:linear-gradient(135deg,var(--brand-light),var(--brand-deep));"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg></span>
+        نص
+      </button>
+      <button id="statusTypePhotoBtn">
+        <span class="attachIcon" style="background:linear-gradient(135deg,#B37FE0,#7C4DBF);"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+        صورة
+      </button>
+      <button id="statusTypeVideoBtn">
+        <span class="attachIcon" style="background:linear-gradient(135deg,#EFC46F,var(--gold-deep));"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></span>
+        فيديو
+      </button>
+    </div>
+    <div class="modalBtns">
+      <button class="btnGhost" id="cancelStatusType">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== مودال حالة نصية ===== -->
+<div class="modal-overlay hidden" id="newStatusModal">
+  <div class="modal-box">
+    <h3>حالة نصية</h3>
     <textarea id="statusTextInput" rows="4" placeholder="اكتب حالتك هنا..."></textarea>
     <div class="modalBtns">
       <button class="btnGhost" id="cancelStatus">إلغاء</button>
       <button class="btnPrimary" id="confirmStatus">نشر</button>
     </div>
   </div>
+</div>
+
+<!-- ===== مودال كابشن للحالة (صورة/فيديو) ===== -->
+<div class="modal-overlay hidden" id="statusCaptionModal">
+  <div class="modal-box">
+    <h3>وصف الحالة (اختياري)</h3>
+    <div id="statusCaptionPreviewWrap" style="margin-bottom:10px;border-radius:12px;overflow:hidden;max-height:220px;display:flex;justify-content:center;background:#000;"></div>
+    <input id="statusCaptionInput" type="text" placeholder="اكتب وصف...">
+    <div class="modalBtns">
+      <button class="btnGhost" id="cancelStatusCaption">إلغاء</button>
+      <button class="btnPrimary" id="confirmStatusCaption">نشر الحالة</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== عارض الحالات ملء الشاشة ===== -->
+<div class="hidden" id="statusViewer">
+  <div class="svProgressRow" id="svProgressRow"></div>
+  <div class="svHeader">
+    <div class="avatar" id="svAvatar" style="width:34px;height:34px;font-size:13px;"></div>
+    <div>
+      <div class="name" id="svName">—</div>
+      <div class="time" id="svTime">—</div>
+    </div>
+    <button class="svClose" id="svCloseBtn"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="svBody" id="svBody">
+    <div class="svTapZone left" id="svTapLeft"></div>
+    <div class="svTapZone right" id="svTapRight"></div>
+  </div>
+  <div class="svFooter" id="svFooter"></div>
 </div>
 
 <!-- ===== مودال البروفايل ===== -->
@@ -591,7 +778,9 @@
 <div class="modal-overlay hidden" id="imageViewer" style="background:rgba(0,0,0,.92);padding:0;">
   <img id="imageViewerImg" src="" style="max-width:100%;max-height:90vh;border-radius:6px;">
 </div>
-<input type="file" id="imageInput" accept="image/*" class="hidden">
+<input type="file" id="imageInput" accept="image/*,video/*" class="hidden">
+<input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden">
+<input type="file" id="statusMediaInput" accept="image/*" class="hidden">
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -1019,7 +1208,7 @@ function loadChats(){
   db.ref('userChats/'+myUid).on('value', async (snap)=>{
     const list = document.getElementById('chatsList');
     if(!snap.exists()){
-      list.innerHTML = '<div class="empty-state"><div class="emoji">💬</div>ابدأ أول همسة<br>دوس + وابعت أول رسالة لصاحبك</div>';
+      list.innerHTML = '<div class="empty-state"><div class="emoji"><svg viewBox="0 0 64 64" width="56" height="56" fill="none"><circle cx="32" cy="32" r="30" fill="#E6F1EB"/><path d="M20 24a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H27l-6 5v-5a4 4 0 0 1-1-.4V24z" fill="#0F6E5C"/><circle cx="26" cy="29" r="1.6" fill="#D9A441"/><circle cx="32" cy="29" r="1.6" fill="#D9A441"/><circle cx="38" cy="29" r="1.6" fill="#D9A441"/></svg></div>ابدأ أول همسة<br>دوس + وابعت أول رسالة لصاحبك</div>';
       return;
     }
     const chatIds = Object.keys(snap.val());
@@ -1036,7 +1225,7 @@ function loadChats(){
     }
     rows.sort((a,b)=> b.lastTs - a.lastTs);
     if(rows.length === 0){
-      list.innerHTML = '<div class="empty-state"><div class="emoji">💬</div>ابدأ أول همسة<br>دوس + وابعت أول رسالة لصاحبك</div>';
+      list.innerHTML = '<div class="empty-state"><div class="emoji"><svg viewBox="0 0 64 64" width="56" height="56" fill="none"><circle cx="32" cy="32" r="30" fill="#E6F1EB"/><path d="M20 24a4 4 0 0 1 4-4h16a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H27l-6 5v-5a4 4 0 0 1-1-.4V24z" fill="#0F6E5C"/><circle cx="26" cy="29" r="1.6" fill="#D9A441"/><circle cx="32" cy="29" r="1.6" fill="#D9A441"/><circle cx="38" cy="29" r="1.6" fill="#D9A441"/></svg></div>ابدأ أول همسة<br>دوس + وابعت أول رسالة لصاحبك</div>';
       return;
     }
     list.innerHTML = rows.map(r=>`
@@ -1177,6 +1366,28 @@ function openChat(chatId, otherUid, name, username, color){
           <div class="t">${fmtTime(m.ts)}</div>
         </div>`;
       }
+      if(m.type === 'video'){
+        return `
+        <div class="bubble video ${out}">
+          <video src="${m.video}" controls preload="metadata" playsinline></video>
+          <div class="t">${fmtTime(m.ts)}</div>
+        </div>`;
+      }
+      if(m.type === 'location'){
+        return `
+        <div class="bubble location ${out}">
+          <div class="locCard" data-lat="${m.lat}" data-lng="${m.lng}">
+            <div class="locMap">
+              <div class="locPin"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg></div>
+            </div>
+            <div class="locInfo">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--brand)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <div><b>الموقع</b><br><span>دوس تفتح في الخرائط</span></div>
+            </div>
+          </div>
+          <div class="t">${fmtTime(m.ts)}</div>
+        </div>`;
+      }
       return `
       <div class="bubble ${out}">
         ${escapeHtml(m.text)}
@@ -1189,7 +1400,11 @@ function openChat(chatId, otherUid, name, username, color){
 }
 document.getElementById('messages').addEventListener('click', (e)=>{
   const img = e.target.closest('.bubble.image img');
-  if(img) openImageViewer(img.dataset.full);
+  if(img){ openImageViewer(img.dataset.full); return; }
+  const locCard = e.target.closest('.locCard');
+  if(locCard){
+    window.open(`https://www.google.com/maps?q=${locCard.dataset.lat},${locCard.dataset.lng}`, '_blank');
+  }
 });
 function escapeHtml(str){
   const d = document.createElement('div');
@@ -1245,24 +1460,108 @@ function setTyping(isTyping){
   if(isTyping) ref.onDisconnect().set(false);
 }
 
-/* ============ إرسال الصور ============ */
-document.getElementById('imageBtn').addEventListener('click', ()=>{
+/* ============ توست داخلي (بديل أنيق لـ alert) ============ */
+const toastHost = document.getElementById('toastHost');
+function toastIconSvg(kind){
+  if(kind === 'error'){
+    return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12" y2="16.5"/></svg>';
+  }
+  if(kind === 'success'){
+    return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#fff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><line x1="12" y1="7.5" x2="12" y2="7.5"/></svg>';
+}
+function showToast(message, kind='info', duration=4200){
+  const card = document.createElement('div');
+  card.className = 'toastCard ' + kind;
+  card.innerHTML = `
+    <span class="toastIconWrap">${toastIconSvg(kind)}</span>
+    <span class="toastText">${escapeHtml(message)}</span>
+    <button class="toastClose" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  `;
+  toastHost.appendChild(card);
+  const remove = ()=>{
+    card.classList.add('leaving');
+    setTimeout(()=> card.remove(), 180);
+  };
+  card.querySelector('.toastClose').addEventListener('click', remove);
+  setTimeout(remove, duration);
+}
+const attachSheet = document.getElementById('attachSheet');
+const MAX_VIDEO_BYTES = 15 * 1024 * 1024; // حد أقصى تقريبي لحجم الفيديو المرسل
+
+document.getElementById('attachBtn').addEventListener('click', ()=>{
+  if(!currentChatId) return;
+  attachSheet.classList.remove('hidden');
+});
+document.getElementById('attachSheetCancel').addEventListener('click', ()=> attachSheet.classList.add('hidden'));
+attachSheet.addEventListener('click', (e)=>{ if(e.target === attachSheet) attachSheet.classList.add('hidden'); });
+
+document.getElementById('attachGalleryBtn').addEventListener('click', ()=>{
+  attachSheet.classList.add('hidden');
   document.getElementById('imageInput').click();
 });
+document.getElementById('attachCameraBtn').addEventListener('click', ()=>{
+  attachSheet.classList.add('hidden');
+  document.getElementById('cameraInput').click();
+});
+document.getElementById('attachLocationBtn').addEventListener('click', ()=>{
+  attachSheet.classList.add('hidden');
+  sendLocationMessage();
+});
+
+/* ============ إرسال الصور والفيديوهات (من المعرض) ============ */
 document.getElementById('imageInput').addEventListener('change', async (e)=>{
   const file = e.target.files[0];
   e.target.value = '';
   if(!file || !currentChatId) return;
+  await handleChatMediaFile(file);
+});
+/* ============ إرسال صورة بالكاميرا ============ */
+document.getElementById('cameraInput').addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file || !currentChatId) return;
+  await handleChatMediaFile(file);
+});
+
+async function handleChatMediaFile(file){
   try{
-    const compressed = await compressImage(file, 900, 0.65);
-    const ts = Date.now();
-    await db.ref('messages/'+currentChatId).push({from: myUid, type:'image', image: compressed, ts});
-    await db.ref('chats/'+currentChatId+'/meta').update({lastMessage:'📷 صورة', lastTs: ts, lastSender: myUid});
+    if(file.type.startsWith('video/')){
+      if(file.size > MAX_VIDEO_BYTES){
+        showToast('الفيديو كبير أوي، اختار فيديو أقصر من 15 ميجا عشان يتبعت', 'error');
+        return;
+      }
+      const base64 = await blobToBase64(file);
+      const ts = Date.now();
+      await db.ref('messages/'+currentChatId).push({from: myUid, type:'video', video: base64, ts});
+      await db.ref('chats/'+currentChatId+'/meta').update({lastMessage:'🎥 فيديو', lastTs: ts, lastSender: myUid});
+    } else {
+      const compressed = await compressImage(file, 900, 0.65);
+      const ts = Date.now();
+      await db.ref('messages/'+currentChatId).push({from: myUid, type:'image', image: compressed, ts});
+      await db.ref('chats/'+currentChatId+'/meta').update({lastMessage:'📷 صورة', lastTs: ts, lastSender: myUid});
+    }
   }catch(err){
     console.error(err);
-    alert('حصل خطأ في إرسال الصورة');
+    showToast('حصل خطأ في إرسال المرفق، حاول تاني', 'error');
   }
-});
+}
+
+/* ============ إرسال الموقع ============ */
+function sendLocationMessage(){
+  if(!currentChatId) return;
+  if(!('geolocation' in navigator)){ showToast('المتصفح مش بيدعم مشاركة الموقع', 'error'); return; }
+  navigator.geolocation.getCurrentPosition(async (pos)=>{
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+    const ts = Date.now();
+    await db.ref('messages/'+currentChatId).push({from: myUid, type:'location', lat, lng, ts});
+    await db.ref('chats/'+currentChatId+'/meta').update({lastMessage:'📍 موقع', lastTs: ts, lastSender: myUid});
+  }, (err)=>{
+    showToast('محتاج إذن الموقع عشان تبعت موقعك، فعّله من إعدادات المتصفح', 'error');
+  }, {enableHighAccuracy:true, timeout:10000});
+}
 function compressImage(file, maxDim, quality){
   return new Promise((resolve, reject)=>{
     const img = new Image();
@@ -1323,7 +1622,7 @@ async function startRecording(e){
       }
     });
   }catch(err){
-    alert('محتاج إذن الميكروفون عشان تسجل رسالة صوتية');
+    showToast('محتاج إذن الميكروفون عشان تسجل رسالة صوتية، فعّله من إعدادات المتصفح', 'error');
     return;
   }
   let mimeType = 'audio/webm;codecs=opus';
@@ -1444,7 +1743,7 @@ function downsampleWave(samples, count){
 function mmss(totalSeconds){
   const s = Math.max(0, Math.floor(totalSeconds));
   const m = Math.floor(s/60);
-  const r = s%60;
+  const r = s % 60;
   return m + ':' + String(r).padStart(2,'0');
 }
 
@@ -1537,6 +1836,8 @@ function seekVoice(id, e, waveWrap){
 
 /* ============ الحالات ============ */
 document.getElementById('myStatusAvatar').style.background = '#999';
+let statusRowsCache = {}; // uid -> {user, items}
+
 function loadStatuses(){
   document.getElementById('myStatusAvatar').style.background = avatarColor(myProfile.username);
   document.getElementById('myStatusAvatar').textContent = initials(myProfile.name);
@@ -1544,7 +1845,7 @@ function loadStatuses(){
   db.ref('status/'+myUid).on('value', snap=>{
     if(snap.exists()){
       const items = Object.values(snap.val());
-      document.getElementById('myStatusSub').textContent = items.length + ' تحديث نشط';
+      document.getElementById('myStatusSub').textContent = items.length + ' تحديث نشط • اضغط للمشاهدة';
       document.getElementById('myStatusRing').classList.remove('seen');
     } else {
       document.getElementById('myStatusSub').textContent = 'اضغط لإضافة حالة';
@@ -1554,23 +1855,26 @@ function loadStatuses(){
 
   db.ref('status').on('value', async (snap)=>{
     const list = document.getElementById('statusList');
+    statusRowsCache = {};
     if(!snap.exists()){ list.innerHTML = '<div class="empty-state">مفيش تحديثات دلوقتي</div>'; return; }
     const now = Date.now();
     const rows = [];
     const all = snap.val();
     for(const uid in all){
       if(uid === myUid) continue;
-      const items = Object.values(all[uid]).filter(s=>s.expiresAt > now);
+      const rawItems = all[uid];
+      const items = Object.keys(rawItems).map(id=>({id, ...rawItems[id]})).filter(s=>s.expiresAt > now).sort((a,b)=>a.ts-b.ts);
       if(items.length === 0) continue;
       const userSnap = await db.ref('users/'+uid).get();
       if(!userSnap.exists()) continue;
       const u = userSnap.val();
-      rows.push({uid, user:u, count: items.length, lastTs: Math.max(...items.map(i=>i.ts))});
+      statusRowsCache[uid] = {user:u, items};
+      rows.push({uid, user:u, count: items.length, lastTs: items[items.length-1].ts});
     }
     if(rows.length === 0){ list.innerHTML = '<div class="empty-state">مفيش تحديثات دلوقتي</div>'; return; }
     rows.sort((a,b)=>b.lastTs-a.lastTs);
     list.innerHTML = rows.map(r=>`
-      <div class="status-item">
+      <div class="status-item" data-uid="${r.uid}">
         <div class="status-ring">
           <div class="avatar" style="width:48px;height:48px;font-size:16px;background:${r.user.color};">${initials(r.user.name)}</div>
         </div>
@@ -1580,10 +1884,25 @@ function loadStatuses(){
         </div>
       </div>
     `).join('');
+    list.querySelectorAll('.status-item').forEach(el=>{
+      el.addEventListener('click', ()=> openStatusViewer(el.dataset.uid, false));
+    });
   });
 }
+
+/* ---- خطوة 1: اختيار نوع الحالة ---- */
+const statusTypeModal = document.getElementById('statusTypeModal');
 const newStatusModal = document.getElementById('newStatusModal');
-document.getElementById('myStatusBtn').addEventListener('click', ()=>{
+const statusCaptionModal = document.getElementById('statusCaptionModal');
+document.getElementById('myStatusBtn').addEventListener('click', async ()=>{
+  const mySnap = await db.ref('status/'+myUid).get();
+  if(mySnap.exists()){ openStatusViewer(myUid, true); return; }
+  statusTypeModal.classList.remove('hidden');
+});
+document.getElementById('cancelStatusType').addEventListener('click', ()=> statusTypeModal.classList.add('hidden'));
+
+document.getElementById('statusTypeTextBtn').addEventListener('click', ()=>{
+  statusTypeModal.classList.add('hidden');
   document.getElementById('statusTextInput').value = '';
   newStatusModal.classList.remove('hidden');
 });
@@ -1592,16 +1911,218 @@ document.getElementById('confirmStatus').addEventListener('click', async ()=>{
   const text = document.getElementById('statusTextInput').value.trim();
   if(!text) return;
   const ts = Date.now();
-  await db.ref('status/'+myUid).push({text, ts, expiresAt: ts + 24*60*60*1000});
+  await db.ref('status/'+myUid).push({type:'text', text, ts, expiresAt: ts + 24*60*60*1000});
   newStatusModal.classList.add('hidden');
 });
+
+let pendingStatusType = null;
+const statusMediaInput = document.getElementById('statusMediaInput');
+document.getElementById('statusTypePhotoBtn').addEventListener('click', ()=>{
+  statusTypeModal.classList.add('hidden');
+  pendingStatusType = 'image';
+  statusMediaInput.setAttribute('accept', 'image/*');
+  statusMediaInput.click();
+});
+document.getElementById('statusTypeVideoBtn').addEventListener('click', ()=>{
+  statusTypeModal.classList.add('hidden');
+  pendingStatusType = 'video';
+  statusMediaInput.setAttribute('accept', 'video/*');
+  statusMediaInput.click();
+});
+
+let pendingStatusContent = null; // { type, data }
+statusMediaInput.addEventListener('change', async (e)=>{
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{
+    if(pendingStatusType === 'video'){
+      if(file.size > MAX_VIDEO_BYTES){
+        showToast('الفيديو كبير أوي، اختار فيديو أقصر من 15 ميجا', 'error');
+        return;
+      }
+      const base64 = await blobToBase64(file);
+      pendingStatusContent = {type:'video', data: base64};
+      document.getElementById('statusCaptionPreviewWrap').innerHTML = `<video src="${base64}" style="max-width:100%;max-height:220px;" controls playsinline></video>`;
+    } else {
+      const compressed = await compressImage(file, 1080, 0.7);
+      pendingStatusContent = {type:'image', data: compressed};
+      document.getElementById('statusCaptionPreviewWrap').innerHTML = `<img src="${compressed}" style="max-width:100%;max-height:220px;">`;
+    }
+    document.getElementById('statusCaptionInput').value = '';
+    statusCaptionModal.classList.remove('hidden');
+  }catch(err){
+    console.error(err);
+    showToast('حصل خطأ في تجهيز الحالة، حاول تاني', 'error');
+  }
+});
+document.getElementById('cancelStatusCaption').addEventListener('click', ()=>{
+  statusCaptionModal.classList.add('hidden');
+  pendingStatusContent = null;
+});
+document.getElementById('confirmStatusCaption').addEventListener('click', async ()=>{
+  if(!pendingStatusContent) return;
+  const caption = document.getElementById('statusCaptionInput').value.trim();
+  const ts = Date.now();
+  const payload = {type: pendingStatusContent.type, ts, expiresAt: ts + 24*60*60*1000, caption};
+  if(pendingStatusContent.type === 'video') payload.video = pendingStatusContent.data;
+  else payload.image = pendingStatusContent.data;
+  await db.ref('status/'+myUid).push(payload);
+  statusCaptionModal.classList.add('hidden');
+  pendingStatusContent = null;
+});
+
+/* ---- عارض الحالات ملء الشاشة ---- */
+const statusViewer = document.getElementById('statusViewer');
+let svItems = [];
+let svIndex = 0;
+let svUid = null;
+let svIsMine = false;
+let svTimer = null;
+let svTimerStart = 0;
+let svTimerDur = 5000;
+let svRafId = null;
+
+async function openStatusViewer(uid, isMine){
+  let entry = statusRowsCache[uid];
+  if(!entry){
+    const snap = await db.ref('status/'+uid).get();
+    if(!snap.exists()) return;
+    const now = Date.now();
+    const raw = snap.val();
+    const items = Object.keys(raw).map(id=>({id, ...raw[id]})).filter(s=>s.expiresAt > now).sort((a,b)=>a.ts-b.ts);
+    if(items.length === 0) return;
+    const uSnap = await db.ref('users/'+uid).get();
+    entry = {user: uSnap.exists() ? uSnap.val() : {name:'مستخدم', color:'#888'}, items};
+  }
+  svItems = entry.items;
+  svUid = uid;
+  svIsMine = isMine;
+  svIndex = 0;
+  document.getElementById('svAvatar').style.background = entry.user.color;
+  document.getElementById('svAvatar').textContent = initials(entry.user.name);
+  document.getElementById('svName').textContent = entry.user.name;
+  document.getElementById('svFooter').innerHTML = svIsMine
+    ? '<button class="svDelete" id="svDeleteBtn">حذف الحالة الحالية</button>'
+    : '';
+  buildSvProgress();
+  statusViewer.classList.remove('hidden');
+  showSvItem(0);
+  if(svIsMine){
+    const delBtn = document.getElementById('svDeleteBtn');
+    if(delBtn) delBtn.addEventListener('click', deleteSvCurrent);
+  }
+}
+
+function buildSvProgress(){
+  const row = document.getElementById('svProgressRow');
+  row.innerHTML = svItems.map(()=>'<div class="svProgressSeg"><div class="fill"></div></div>').join('');
+}
+
+function showSvItem(i){
+  clearSvTimer();
+  if(i < 0){ closeStatusViewer(); return; }
+  if(i >= svItems.length){ closeStatusViewer(); return; }
+  svIndex = i;
+  const item = svItems[i];
+  document.getElementById('svTime').textContent = fmtTime(item.ts);
+
+  const segs = document.querySelectorAll('#svProgressRow .svProgressSeg');
+  segs.forEach((seg, idx)=>{
+    seg.classList.toggle('done', idx < i);
+    const fill = seg.querySelector('.fill');
+    fill.style.width = idx < i ? '100%' : '0%';
+    if(idx === i) seg.classList.remove('done');
+  });
+
+  const body = document.getElementById('svBody');
+  body.querySelectorAll('img,video,.svTextCard').forEach(el=>el.remove());
+  const tapLeft = document.getElementById('svTapLeft');
+  const tapRight = document.getElementById('svTapRight');
+
+  if(item.type === 'video'){
+    const v = document.createElement('video');
+    v.src = item.video; v.controls = false; v.autoplay = true; v.playsInline = true; v.muted = false;
+    body.insertBefore(v, tapLeft);
+    svTimerDur = 15000;
+    v.addEventListener('loadedmetadata', ()=>{
+      if(v.duration && isFinite(v.duration)) svTimerDur = Math.min(v.duration*1000, 60000);
+      startSvTimer(i);
+    }, {once:true});
+  } else if(item.type === 'image'){
+    const img = document.createElement('img');
+    img.src = item.image;
+    body.insertBefore(img, tapLeft);
+    svTimerDur = 5000;
+    startSvTimer(i);
+  } else {
+    const card = document.createElement('div');
+    card.className = 'svTextCard';
+    card.textContent = item.text || '';
+    body.insertBefore(card, tapLeft);
+    svTimerDur = 5000;
+    startSvTimer(i);
+  }
+  if(item.caption){
+    const cap = document.createElement('div');
+    cap.className = 'svTextCard';
+    cap.style.position = 'absolute';
+    cap.style.bottom = '18px';
+    cap.style.top = 'auto';
+    cap.style.minHeight = 'auto';
+    cap.style.background = 'rgba(0,0,0,.5)';
+    cap.style.fontSize = '14px';
+    cap.style.padding = '10px 16px';
+    cap.textContent = item.caption;
+    body.appendChild(cap);
+  }
+}
+
+function startSvTimer(i){
+  svTimerStart = Date.now();
+  const seg = document.querySelectorAll('#svProgressRow .svProgressSeg')[i];
+  const fill = seg ? seg.querySelector('.fill') : null;
+  function tick(){
+    const elapsed = Date.now() - svTimerStart;
+    const pct = Math.min(100, (elapsed / svTimerDur) * 100);
+    if(fill) fill.style.width = pct + '%';
+    if(elapsed >= svTimerDur){ showSvItem(svIndex + 1); return; }
+    svRafId = requestAnimationFrame(tick);
+  }
+  svRafId = requestAnimationFrame(tick);
+}
+function clearSvTimer(){
+  if(svRafId){ cancelAnimationFrame(svRafId); svRafId = null; }
+  const body = document.getElementById('svBody');
+  const v = body.querySelector('video');
+  if(v) v.pause();
+}
+function closeStatusViewer(){
+  clearSvTimer();
+  statusViewer.classList.add('hidden');
+  svItems = []; svIndex = 0; svUid = null;
+}
+document.getElementById('svCloseBtn').addEventListener('click', closeStatusViewer);
+document.getElementById('svTapLeft').addEventListener('click', ()=> showSvItem(svIndex - 1));
+document.getElementById('svTapRight').addEventListener('click', ()=> showSvItem(svIndex + 1));
+
+async function deleteSvCurrent(){
+  const item = svItems[svIndex];
+  if(!item || !svUid) return;
+  if(!confirm('تمسح الحالة دي؟')) return;
+  await db.ref('status/'+svUid+'/'+item.id).remove();
+  svItems.splice(svIndex, 1);
+  if(svItems.length === 0){ closeStatusViewer(); return; }
+  buildSvProgress();
+  showSvItem(Math.min(svIndex, svItems.length - 1));
+}
 
 /* ============ المكالمات: السجل ============ */
 function loadCalls(){
   db.ref('calls/'+myUid).on('value', async (snap)=>{
     const list = document.getElementById('callsList');
     if(!snap.exists()){
-      list.innerHTML = '<div class="empty-state"><div class="emoji">📞</div>مفيش مكالمات لسه</div>';
+      list.innerHTML = '<div class="empty-state"><div class="emoji"><svg viewBox="0 0 64 64" width="56" height="56" fill="none"><circle cx="32" cy="32" r="30" fill="#E6F1EB"/><path d="M24.5 22.5c1 2 2 3.6 3.4 5-1 1-2 2-2 3 1.5 4 5.5 8 9.5 9.5 1-.2 2-1.2 3-2.2 1.4 1.4 3 2.4 5 3.4a3 3 0 0 1-2 3.3c-7 2.2-16.7-7.5-18.9-14.5a3 3 0 0 1 2-3z" fill="#0F6E5C"/></svg></div>مفيش مكالمات لسه</div>';
       return;
     }
     const items = Object.values(snap.val()).sort((a,b)=>b.ts-a.ts).slice(0,50);
